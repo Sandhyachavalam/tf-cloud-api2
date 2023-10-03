@@ -83,4 +83,4 @@ jobs:
           TFE_ORG_TOKEN: ${{ secrets.TF_CLOUD_TOKEN }}
           TFE_ADDR: "https://app.terraform.io"
           TFE_ORG: "BOA-TEST"
-          OAUTH_TOKEN: "ghaot-fe9NYUfJjboiRxcG"
+          OAUTH_TOKEN: "ghaot-UYrtsPW4EnAcz3pX"
