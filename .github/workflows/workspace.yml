@@ -7,7 +7,7 @@ on:
 
 env:
    TF_API_TOKEN: "${{ secrets.TF_CLOUD_TOKEN }}"
-   PROJECT_ID: "prj-pasMmXkDqjACd7gx"
+   PROJECT_ID: "prj-KoWetGSqqhJL2BmK"
 
 jobs:
   terraform:
@@ -49,7 +49,7 @@ jobs:
                                                  "terraform_version": "1.5.7",
                                                  "working-directory": "infrastructure",
                                                  "vcs-repo": {
-                                                    "identifier": "Rajap54/tf-cloud-api",
+                                                    "identifier": "Sandhyachavalam/tf-cloud-api2",
                                                     "oauth-token-id": "${{ env.OAUTH_TOKEN }}",
                                                     "branch": "main"
                                                     }
@@ -82,5 +82,5 @@ jobs:
           WORKING_DIRECTORY: infrastructure
           TFE_ORG_TOKEN: ${{ secrets.TF_CLOUD_TOKEN }}
           TFE_ADDR: "https://app.terraform.io"
-          TFE_ORG: "support-US"
+          TFE_ORG: "BOA-TEST"
           OAUTH_TOKEN: "ghaot-fe9NYUfJjboiRxcG"
