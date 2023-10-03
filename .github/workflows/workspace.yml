@@ -1,0 +1,86 @@
+name: Create Terraform Cloud Workspace
+
+on:
+  push:
+    branches:
+        - main
+
+env:
+   TF_API_TOKEN: "${{ secrets.TF_CLOUD_TOKEN }}"
+   PROJECT_ID: "prj-pasMmXkDqjACd7gx"
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Install jq
+        run: |
+          sudo apt-get update
+          sudo apt-get install jq
+
+      - name: Verify jq installation
+        run: jq --version
+
+      - name: check if workspace exists
+        run: |
+          set -e # Enable error checking
+          curl \
+          --header "Authorization: Bearer ${{ env.TF_API_TOKEN }}" \
+          --header "Content-Type: application/vnd.api+json" \
+          https://app.terraform.io/api/v2/organizations/${{ env.TFE_ORG }}/workspaces > output.json
+            
+          WORKSPACE_EXISTS=$(cat output.json | jq -r '.data[].attributes.name'| grep -q "${{ env.WORKSPACE_NAME }}" && echo "true" || echo "false")
+           echo $WORKSPACE_EXISTS
+
+          if [ "$WORKSPACE_EXISTS" == "true" ]; then
+            echo "Workspace already exists. Skipping workspace creation."
+          else
+            echo "Workspace does not exist. Creating workspace..."
+            CREATE_WORKSPACE_RESPONSE=$(curl -s -X POST -H "Authorization: Bearer ${{ env.TF_API_TOKEN }}" \
+                                           -H "Content-Type: application/vnd.api+json" \
+                                           -d '{
+                                             "data": {
+                                               "attributes": {
+                                                 "name": "${{ env.WORKSPACE_NAME }}",
+                                                 "terraform_version": "1.5.7",
+                                                 "working-directory": "infrastructure",
+                                                 "vcs-repo": {
+                                                    "identifier": "Rajap54/tf-cloud-api",
+                                                    "oauth-token-id": "${{ env.OAUTH_TOKEN }}",
+                                                    "branch": "main"
+                                                    }
+                                               },
+                                               "relationships": {
+                                                   "project": {
+                                                      "data": {
+                                                         "type": "projects",
+                                                         "id": "${{ env.PROJECT_ID }}"
+                                                     }
+                                                   }
+                                                 },
+                                                 "type": "workspaces"
+                                               }
+                                              }' \
+                                              "https://app.terraform.io/api/v2/organizations/${{ env.TFE_ORG }}/workspaces")
+             echo "$CREATE_WORKSPACE_RESPONSE"                               
+            # Check the response to verify workspace creation
+              if echo "$CREATE_WORKSPACE_RESPONSE" | jq -e '.data' > /dev/null; then
+                 echo "Workspace created successfully."
+              else
+                 echo "Failed to create workspace."
+                 exit 1
+              fi
+            fi                            
+
+        env:
+          WORKSPACE_NAME: dev-workspace
+          TF_VERSION: 1.5.7
+          WORKING_DIRECTORY: infrastructure
+          TFE_ORG_TOKEN: ${{ secrets.TF_CLOUD_TOKEN }}
+          TFE_ADDR: "https://app.terraform.io"
+          TFE_ORG: "support-US"
+          OAUTH_TOKEN: "ghaot-fe9NYUfJjboiRxcG"
